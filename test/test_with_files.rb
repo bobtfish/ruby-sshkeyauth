@@ -40,6 +40,19 @@ class TestWithFiles < Test::Unit::TestCase
     end
   end
 
+  def test_sign_and_verify_with_options_in_rsa_key_file
+    @signer.add_private_key_file("keys/tester_nopassphrase_rsa")
+    @verifier.add_public_key_file("keys/tester_nopassphrase_withoptions_rsa.pub")
+
+    inputs = [ "hello", "foo bar 1 2 3 4", Marshal.dump({:test => :fizz}),
+               "", "1", " " ]
+    inputs.each do |data|
+      signatures = @signer.sign(data)
+      assert(@verifier.verify?(signatures, data),
+             "Signature verify failed against data '#{data.inspect}'")
+    end
+  end
+
   def test_sign_and_verify_with_rsa_key_fails_on_bad_data
     @signer.add_private_key_file("keys/tester_nopassphrase_rsa")
     @verifier.add_public_key_file("keys/tester_nopassphrase_rsa.pub")
